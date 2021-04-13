@@ -1,0 +1,16 @@
+{
+	"name": "Scala 3",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"postCreateCommand": "sbt version",
+	"extensions": [
+		"scalameta.metals",
+		"scala-lang.scala"
+	],
+	"settings": {
+		"metals.javaHome": "/usr/lib/jvm/java-15-openjdk",
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+	"remoteUser": "vscode"
+}
