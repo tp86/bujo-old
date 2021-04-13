@@ -5,4 +5,5 @@ target/
 /.bsp/
 /.metals/
 .bloop/
-/project/
+project/*
+!project/build.properties
