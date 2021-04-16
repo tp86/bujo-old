@@ -1,20 +1,32 @@
 package bujo.domain
 
+import scala.concurrent.Future
 import java.time.LocalDateTime
 
-case class Tag(val name: String)
+// Model entities
+final case class Tag(val name: String)
 
-enum TaskStatus:
-  case ToDo
-  case Done
-  case Cancelled
-  case Moved
+opaque type NoteText = String
+private[domain] object NoteText:
+  def apply(text: String): NoteText = text
 
-enum Entry:
-  case Note(text: String, tags: List[Tag], dateCreated: LocalDateTime)
-  case Task(text: String, tags: List[Tag], due_date: Option[LocalDateTime], status: TaskStatus)
-  
-object Entry:
-  object Note:
-    def apply(text: String) =
-      new Note(text, List.empty, LocalDateTime.now)
+final case class Note(text: NoteText, dateCreated: LocalDateTime, tags: Set[Tag])
+
+// Errors
+trait Error:
+  def message: String
+
+class TextValidationError(private val msg: String) extends Error:
+  val message = msg
+class NoteSavingError(private val msg: String) extends Error:
+  val message = msg
+
+type ValidationError = TextValidationError
+
+type NoteCreationError = ValidationError | NoteSavingError
+
+// Procedures
+type NoteCreator = String => Either[Seq[NoteCreationError], Note]
+type TextValidator = String => Either[Seq[TextValidationError], NoteText]
+type NoteMaker = NoteText => Note
+type NoteSaver = Note => Future[Either[Seq[NoteSavingError], Note]]

@@ -4,8 +4,7 @@
 		"dockerfile": "Dockerfile",
 	},
 	"extensions": [
-		"scalameta.metals",
-		"scala-lang.scala"
+		"scalameta.metals"
 	],
 	"settings": {
 		"metals.javaHome": "/usr/lib/jvm/java-15-openjdk",
