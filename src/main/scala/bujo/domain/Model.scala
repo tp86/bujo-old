@@ -24,16 +24,29 @@ class NoteSavingError(private val msg: String) extends Error:
 enum NoteCreationError:
   case ValidationError(err: TextValidationError)
   case SavingError(err: NoteSavingError)
+  def message: String = this match
+    case ValidationError(err) => err.message
+    case SavingError(err) => err.message
+object NoteCreationError:
+  def apply(err: Error): NoteCreationError = 
+    err match
+      case e: TextValidationError => ValidationError(e)
+      case e: NoteSavingError => SavingError(e)
 
 // Procedures
 object NoteText:
   def apply(text: String): NoteText = text
-def validateText(text: String): Either[TextValidationError, NoteText] = ???
+
+def validateText(text: String): Either[TextValidationError, NoteText] = Right(NoteText(text))
+
 object Note:
   def apply(text: NoteText): Note = new Note(text, LocalDateTime.now, Set.empty)
-def saveNote(note: Note): EitherT[Future, NoteSavingError, Note] = ???
+
+def saveNote(note: Note): EitherT[Future, NoteSavingError, Note] = EitherT.fromEither(Right(note))
+
 def createNote(text: String): EitherT[Future, NoteCreationError, Note] = 
-  val validatedNote = validateText(text) map Note.apply leftMap NoteCreationError.ValidationError.apply
-  EitherT.fromEither(validatedNote) flatMap {
-    note => saveNote(note) leftMap NoteCreationError.SavingError.apply
+  val validNote = validateText(text) map Note.apply
+  val validNoteTypeCorrected = validNote leftMap NoteCreationError.apply
+  EitherT.fromEither(validNoteTypeCorrected) flatMap {
+    note => saveNote(note) leftMap NoteCreationError.apply
   }
