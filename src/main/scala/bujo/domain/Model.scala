@@ -42,15 +42,15 @@ def validateText(text: String): ValidatedNel[TextValidationError, String] =
     TextValidationError("Note text cannot be longer than 255 characters").invalidNel
 
 // Procedures
-object NoteText:
+private object NoteText:
   def apply(text: String): NoteText = text
 
 object Note:
-  def apply(text: NoteText): Note = new Note(text, LocalDateTime.now, Set.empty)
+  private def apply(text: NoteText): Note = new Note(text, LocalDateTime.now, Set.empty)
   def create(text: String): Either[List[TextValidationError], Note] = 
     validateText(text).map(NoteText.apply andThen Note.apply).toEither.leftMap(_.toList)
 
-def saveNote(note: Note): EitherT[Future, NoteSavingError, Note] = EitherT.fromEither(Right(note))
+private def saveNote(note: Note): EitherT[Future, NoteSavingError, Note] = EitherT.fromEither(Right(note))
 
 def createNote(text: String): EitherT[Future, List[NoteCreationError], Note] = 
   val validNote = Note.create(text) leftMap (_.map(NoteCreationError.apply))
