@@ -18,15 +18,15 @@ class NoteMakerTest extends flatspec.FixtureAsyncFlatSpec:
   "createNote" should "create a Note given valid NoteText" in { f =>
     createNote(f.text).value map { e =>
       e match
-        case Left(err) => fail(err.message)
+        case Left(errs) => fail(errs.map(_.message).mkString("\n"))
         case Right(note) => assert(note.isInstanceOf[Note])
     }
   }
   
-  it should "make a Note with current timestamp" in { f =>
+  it should "create a Note with current timestamp" in { f =>
     createNote(f.text).value map { e =>
       e match
-        case Left(err) => fail(err.message)
+        case Left(errs) => fail(errs.map(_.message).mkString("\n"))
         case Right(note) => {
           assert(note.dateCreated isAfter (LocalDateTime.now minusSeconds 1))
           assert(note.dateCreated isBefore LocalDateTime.now)
@@ -34,10 +34,10 @@ class NoteMakerTest extends flatspec.FixtureAsyncFlatSpec:
     }
   }
   
-  it should "make a Note with empty Tag set" in { f =>
+  it should "create a Note with empty Tag set" in { f =>
     createNote(f.text).value map { e =>
       e match
-        case Left(err) => fail(err.message)
+        case Left(errs) => fail(errs.map(_.message).mkString("\n"))
         case Right(note) => {
           assert(note.tags.isEmpty)
         }

@@ -3,8 +3,9 @@ package bujo.domain
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.time.LocalDateTime
-import cats.data.EitherT
-import cats.implicits.{catsSyntaxEither, catsStdInstancesForFuture}
+import cats.data.{EitherT, ValidatedNel}
+import cats.implicits.{catsSyntaxEither, catsStdInstancesForFuture, catsSyntaxValidatedId}
+import cats.syntax.apply.*
 
 // Model entities
 final case class Tag(val name: String)
@@ -37,16 +38,20 @@ object NoteCreationError:
 object NoteText:
   def apply(text: String): NoteText = text
 
-def validateText(text: String): Either[TextValidationError, NoteText] = Right(NoteText(text))
+def validateText(text: String): ValidatedNel[TextValidationError, String] = 
+  if text.length < 256 then
+    text.validNel
+  else
+    TextValidationError("Note text cannot be longer than 255 characters").invalidNel
 
 object Note:
   def apply(text: NoteText): Note = new Note(text, LocalDateTime.now, Set.empty)
 
 def saveNote(note: Note): EitherT[Future, NoteSavingError, Note] = EitherT.fromEither(Right(note))
 
-def createNote(text: String): EitherT[Future, NoteCreationError, Note] = 
-  val validNote = validateText(text) map Note.apply
-  val validNoteTypeCorrected = validNote leftMap NoteCreationError.apply
+def createNote(text: String): EitherT[Future, List[NoteCreationError], Note] = 
+  val validNote = validateText(text).map(NoteText.apply) map Note.apply
+  val validNoteTypeCorrected = validNote.toEither leftMap (errNel => errNel.toList.map(NoteCreationError.apply))
   EitherT.fromEither(validNoteTypeCorrected) flatMap {
-    note => saveNote(note) leftMap NoteCreationError.apply
+    note => saveNote(note) leftMap (err => List(NoteCreationError(err)))
   }
