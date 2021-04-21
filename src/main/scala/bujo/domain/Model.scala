@@ -33,25 +33,27 @@ object NoteCreationError:
     err match
       case e: TextValidationError => ValidationError(e)
       case e: NoteSavingError => SavingError(e)
-
-// Procedures
-object NoteText:
-  def apply(text: String): NoteText = text
-
+      
+// Validations
 def validateText(text: String): ValidatedNel[TextValidationError, String] = 
   if text.length < 256 then
     text.validNel
   else
     TextValidationError("Note text cannot be longer than 255 characters").invalidNel
 
+// Procedures
+object NoteText:
+  def apply(text: String): NoteText = text
+
 object Note:
   def apply(text: NoteText): Note = new Note(text, LocalDateTime.now, Set.empty)
+  def create(text: String): Either[List[TextValidationError], Note] = 
+    validateText(text).map(NoteText.apply andThen Note.apply).toEither.leftMap(_.toList)
 
 def saveNote(note: Note): EitherT[Future, NoteSavingError, Note] = EitherT.fromEither(Right(note))
 
 def createNote(text: String): EitherT[Future, List[NoteCreationError], Note] = 
-  val validNote = validateText(text).map(NoteText.apply) map Note.apply
-  val validNoteTypeCorrected = validNote.toEither leftMap (errNel => errNel.toList.map(NoteCreationError.apply))
-  EitherT.fromEither(validNoteTypeCorrected) flatMap {
+  val validNote = Note.create(text) leftMap (_.map(NoteCreationError.apply))
+  EitherT.fromEither(validNote) flatMap {
     note => saveNote(note) leftMap (err => List(NoteCreationError(err)))
   }
