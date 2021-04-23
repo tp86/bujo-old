@@ -8,14 +8,15 @@ import scala.util.{Success, Failure}
 
 import java.time.LocalDateTime
 
-class NoteMakerTest extends flatspec.FixtureAsyncFlatSpec:
+class CreateNote extends flatspec.FixtureAsyncFlatSpec:
 
   case class FixtureParam(text: String)
 
   def withFixture(test: OneArgAsyncTest) = 
     super.withFixture(test.toNoArgAsyncTest(FixtureParam("Some note text")))
 
-  "createNote" should "create a Note given valid NoteText" in { f =>
+  "a Note" should "be created given valid NoteText" in { f =>
+    import bujo.domain.givens.saver
     createNote(f.text).value map { e =>
       e match
         case Left(errs) => fail(errs.map(_.message).mkString("\n"))
@@ -23,7 +24,8 @@ class NoteMakerTest extends flatspec.FixtureAsyncFlatSpec:
     }
   }
   
-  it should "create a Note with current timestamp" in { f =>
+  it should " be created with current timestamp" in { f =>
+    import bujo.domain.givens.saver
     createNote(f.text).value map { e =>
       e match
         case Left(errs) => fail(errs.map(_.message).mkString("\n"))
@@ -34,7 +36,8 @@ class NoteMakerTest extends flatspec.FixtureAsyncFlatSpec:
     }
   }
   
-  it should "create a Note with empty Tag set" in { f =>
+  it should "be created with empty Tag set" in { f =>
+    import bujo.domain.givens.saver
     createNote(f.text).value map { e =>
       e match
         case Left(errs) => fail(errs.map(_.message).mkString("\n"))
