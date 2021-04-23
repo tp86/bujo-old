@@ -5,6 +5,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Failure}
 import java.time.LocalDateTime
 import cats.data.{EitherT, ValidatedNel}
+import cats.data.Validated.{Valid, Invalid}
 import cats.implicits.{
   catsSyntaxEither,
   catsStdInstancesForFuture,
@@ -43,25 +44,38 @@ object NoteCreationError:
       case e: NoteSavingError     => SavingError(e)
 
 // Validations
-def validateText(text: String): ValidatedNel[TextValidationError, String] =
-  if text.length < 256 then text.validNel
+def validateTextLength(text: String): Either[TextValidationError, String] =
+  if text.length < 256 then Right(text)
   else
-    TextValidationError(
-      "Note text cannot be longer than 255 characters"
-    ).invalidNel
+    Left(
+      TextValidationError(
+        "Note text cannot be longer than 255 characters"
+      )
+    )
+
+def validateText(text: String): Either[List[TextValidationError], String] =
+  List(
+    validateTextLength(text),
+    validateTextLength(text)
+  ).reduce {
+    case (v@Valid(_), Valid(_)) => v
+    case (i@Invalid(_), Valid(_)) => i
+    case (Valid(_), i@Invalid(_)) => i
+    case (Invalid(l1), Invalid(l2)) => Invalid(l1.concatNel(l2))
+  }.toEither.leftMap(_.toList)
+  
 
 // Procedures
-private object NoteText:
-  def apply(text: String): NoteText = text
-
+object NoteText:
+  private[domain] def apply(text: String): NoteText = text
+  def safe(text: String): Option[NoteText] = validateText(text).toOption
+  
 object Note:
   private def apply(text: NoteText): Note =
     new Note(text, LocalDateTime.now, Set.empty)
   def create(text: String): Either[List[TextValidationError], Note] =
     validateText(text)
       .map(NoteText.apply andThen Note.apply)
-      .toEither
-      .leftMap(_.toList)
 
 private def saveNote(
     note: Note
