@@ -1,25 +1,32 @@
 package bujo.domain
 
 import scala.concurrent.Future
+import cats.data.EitherT
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Failure}
 import java.time.LocalDateTime
-import cats.data.EitherT
-import cats.implicits.{
-  catsSyntaxEither,
-  catsStdInstancesForFuture,
-}
 import bujo.extensions.sequenceLeft
 
 // Model entities
-final case class Tag(val name: String)
+object Model:
+  final case class Tag(val name: String)
 
-opaque type NoteText = String
+  opaque type NoteText = String
 
-final case class Note(
-    text: NoteText,
-    dateCreated: LocalDateTime,
-    tags: Set[Tag])
+  final case class Note(
+      text: NoteText,
+      dateCreated: LocalDateTime,
+      tags: Set[Tag])
+
+  object NoteText:
+    private[domain] def apply(text: String): NoteText = text
+    
+  object Note:
+    private def apply(text: NoteText): Note =
+      new Note(text, LocalDateTime.now, Set.empty)
+    def create(text: String): Either[Seq[TextValidationError], Model.Note] =
+      validateText(text)
+        .map(NoteText.apply andThen Note.apply)
 
 // Errors
 trait Error:
@@ -55,34 +62,3 @@ def validateText(text: String): Either[Seq[TextValidationError], String] =
   List(validateTextLength(text)).sequenceLeft
 
 // Procedures
-object NoteText:
-  private[domain] def apply(text: String): NoteText = text
-  
-object Note:
-  private def apply(text: NoteText): Note =
-    new Note(text, LocalDateTime.now, Set.empty)
-  def create(text: String): Either[Seq[TextValidationError], Note] =
-    validateText(text)
-      .map(NoteText.apply andThen Note.apply)
-
-private def saveNote(
-    note: Note
-  )(using saver: Note => Unit
-  ): EitherT[Future, NoteSavingError, Note] =
-  val fnote = Future(saver.apply(note))
-    .map(_ => Right(note))
-    .recover { case error =>
-      Left(NoteSavingError(error.getMessage))
-    }
-  EitherT(fnote)
-
-def createNote(
-    text: String
-  )(using Note => Unit
-  ): EitherT[Future, List[NoteCreationError], Note] =
-  val validNote = Note.create(text) leftMap (_.map(NoteCreationError.apply))
-  EitherT.fromEither(validNote)
-    .leftMap(_.toList)
-    .flatMap { note =>
-      saveNote(note) leftMap (err => List(NoteCreationError(err)))
-    }
