@@ -4,14 +4,12 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Failure}
 import java.time.LocalDateTime
-import cats.data.{EitherT, ValidatedNel}
-import cats.data.Validated.{Valid, Invalid}
+import cats.data.EitherT
 import cats.implicits.{
   catsSyntaxEither,
   catsStdInstancesForFuture,
-  catsSyntaxValidatedId
 }
-import cats.syntax.apply.*
+import bujo.extensions.sequenceLeft
 
 // Model entities
 final case class Tag(val name: String)
@@ -53,27 +51,17 @@ def validateTextLength(text: String): Either[TextValidationError, String] =
       )
     )
 
-def validateText(text: String): Either[List[TextValidationError], String] =
-  List(
-    validateTextLength(text),
-    validateTextLength(text)
-  ).reduce {
-    case (v@Valid(_), Valid(_)) => v
-    case (i@Invalid(_), Valid(_)) => i
-    case (Valid(_), i@Invalid(_)) => i
-    case (Invalid(l1), Invalid(l2)) => Invalid(l1.concatNel(l2))
-  }.toEither.leftMap(_.toList)
-  
+def validateText(text: String): Either[Seq[TextValidationError], String] =
+  List(validateTextLength(text)).sequenceLeft
 
 // Procedures
 object NoteText:
   private[domain] def apply(text: String): NoteText = text
-  def safe(text: String): Option[NoteText] = validateText(text).toOption
   
 object Note:
   private def apply(text: NoteText): Note =
     new Note(text, LocalDateTime.now, Set.empty)
-  def create(text: String): Either[List[TextValidationError], Note] =
+  def create(text: String): Either[Seq[TextValidationError], Note] =
     validateText(text)
       .map(NoteText.apply andThen Note.apply)
 
@@ -93,6 +81,8 @@ def createNote(
   )(using Note => Unit
   ): EitherT[Future, List[NoteCreationError], Note] =
   val validNote = Note.create(text) leftMap (_.map(NoteCreationError.apply))
-  EitherT.fromEither(validNote) flatMap { note =>
-    saveNote(note) leftMap (err => List(NoteCreationError(err)))
-  }
+  EitherT.fromEither(validNote)
+    .leftMap(_.toList)
+    .flatMap { note =>
+      saveNote(note) leftMap (err => List(NoteCreationError(err)))
+    }

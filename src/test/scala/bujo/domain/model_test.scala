@@ -6,6 +6,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import java.time.LocalDateTime
 
+import bujo.domain.givens.saver
+
 class CreateNote extends flatspec.FixtureAsyncFlatSpec:
 
   case class FixtureParam(text: String)
@@ -14,10 +16,9 @@ class CreateNote extends flatspec.FixtureAsyncFlatSpec:
     super.withFixture(test.toNoArgAsyncTest(FixtureParam("Some note text")))
 
   "a Note" should "be created given valid NoteText" in { f =>
-    import bujo.domain.givens.saver
     createNote(f.text).value map { e =>
       e match
-        case Left(errs)  => fail(errs.map(_.message).mkString("\n"))
+        case Left(errs) => fail(errs.map(_.message).mkString("\n"))
         case Right(note) => {
           assert(note.isInstanceOf[Note])
           assert(note.text equals "Some note text")
@@ -26,7 +27,6 @@ class CreateNote extends flatspec.FixtureAsyncFlatSpec:
   }
 
   it should " be created with current timestamp" in { f =>
-    import bujo.domain.givens.saver
     createNote(f.text).value map { e =>
       e match
         case Left(errs) => fail(errs.map(_.message).mkString("\n"))
@@ -38,7 +38,6 @@ class CreateNote extends flatspec.FixtureAsyncFlatSpec:
   }
 
   it should "be created with empty Tag set" in { f =>
-    import bujo.domain.givens.saver
     createNote(f.text).value map { e =>
       e match
         case Left(errs) => fail(errs.map(_.message).mkString("\n"))
@@ -49,7 +48,6 @@ class CreateNote extends flatspec.FixtureAsyncFlatSpec:
   }
 
   it should "return a validation error when text is too long" in { _ =>
-    import bujo.domain.givens.saver
     createNote("very long text ".repeat(18)).value map { e =>
       e match
         case Left(errs) =>
