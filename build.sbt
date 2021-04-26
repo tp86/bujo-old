@@ -9,7 +9,7 @@ lazy val root = project
     scalaVersion := scala3Version,
     
     Test / jacocoReportSettings := JacocoReportSettings()
-      .withFormats(JacocoReportFormats.HTML, JacocoReportFormats.XML),
+      .withFormats(JacocoReportFormats.ScalaHTML, JacocoReportFormats.XML),
 
     test := (Test / jacoco).value,
 
