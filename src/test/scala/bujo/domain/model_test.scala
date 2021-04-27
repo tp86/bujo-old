@@ -7,7 +7,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.time.LocalDateTime
 
 import bujo.domain.impl.*
-import bujo.domain.Model.Note
+import bujo.domain.model.Note
+import bujo.domain.model.error.*
 
 class CreateNote extends flatspec.FixtureAsyncFlatSpec:
 

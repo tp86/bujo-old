@@ -2,7 +2,8 @@ package bujo.domain
 
 import cats.data.EitherT
 import scala.concurrent.Future
-import bujo.domain.Model.Note
+import bujo.domain.model.Note
+import bujo.domain.model.error.*
 import cats.implicits.{catsSyntaxEither, catsStdInstancesForFuture}
 import scala.concurrent.ExecutionContext.Implicits.global
 
