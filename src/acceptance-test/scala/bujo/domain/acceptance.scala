@@ -3,19 +3,19 @@ package bujo.domain
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.GivenWhenThen
 
-import bujo.domain.model.*
-import bujo.domain.validation.validateText
+import bujo.domain.model.{error => _, *}
+import bujo.domain.validation.*
 
 class NoteFeatureTest extends AnyFeatureSpec, GivenWhenThen:
 
-  Feature("Note") {
+  Feature("Basic Note operations") {
     Scenario("user creates note with valid text") {
       Given("user provides valid text")
       val text: String = "Some note text"
       assert(validateText(text).isRight)
       
       When("user creates note")
-      val note = createNote(text)
+      val note = Note.create(text)
 
       Then("note is created")
       note match 
@@ -31,12 +31,12 @@ class NoteFeatureTest extends AnyFeatureSpec, GivenWhenThen:
       assert(validateText(invalidText).isLeft)
       
       When("user creates note")
-      val note = createNote(invalidText)
+      val note = Note.create(invalidText)
 
       Then("note text validation error is returned")
       note match
         case Left(errs) =>
-          assert(errs contains error.NoteTextValidationError)
+          assert(errs exists (_.isInstanceOf[error.NoteTextValidationError]))
         case Right(_) => fail("note should not be created with invalid text")
     }
   }

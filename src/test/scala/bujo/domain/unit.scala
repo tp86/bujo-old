@@ -16,7 +16,7 @@ class NoteTest extends flatspec.FixtureAnyFlatSpec:
     super.withFixture(test.toNoArgTest(FixtureParam("Some note text")))
 
   "a Note" should "be created given valid NoteText" in { f =>
-    createNote(f.text) match
+    Note.create(f.text) match
       case Left(errs) => fail(errs.map(_.message).mkString("\n"))
       case Right(note) =>
         assert(note.isInstanceOf[Note])
