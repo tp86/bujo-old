@@ -1,3 +1,5 @@
+import bloop.integrations.sbt.BloopDefaults
+
 val scala3Version = "3.0.0-RC2"
 lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.7"
 
@@ -17,8 +19,9 @@ lazy val root = project
     Test / jacocoReportSettings := JacocoReportSettings()
       .withFormats(JacocoReportFormats.ScalaHTML, JacocoReportFormats.XML),
       
-    inConfig(AccTest)(Defaults.testSettings),
+    inConfig(AccTest)(Defaults.testSettings ++ BloopDefaults.configSettings),
 
-    libraryDependencies += scalatest % "test,acceptance-test",
+    libraryDependencies += scalatest % Test,
+    libraryDependencies += scalatest % AccTest,
     libraryDependencies += "org.typelevel" %% "cats-core" % "2.5.0"
   )
