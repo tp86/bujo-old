@@ -45,7 +45,7 @@ class NoteFeatureTest extends AnyFeatureSpec, GivenWhenThen:
 
     Scenario("User searches for Notes matching text") {
       Given("Existing Notes")
-      val notes = List("Some note text", "Interesting text")
+      val notes = List("Some note text", "Interesting text", "Interesting note")
         .map(Note.create)
         .map {
           case Left(errs) =>
@@ -54,11 +54,21 @@ class NoteFeatureTest extends AnyFeatureSpec, GivenWhenThen:
             )
           case Right(note) => note
         }
-      
-        When("User seaches for Notes using text")
-        pending
-        
-        Then("Matching Notes are returned")
-        pending
+      import bujo.domain.NoteRepository
+      given NoteRepository = new NoteRepository {
+        def save(note: Note) = Left(List.empty)
+        def getAll = notes
+      }
+
+      When("User searches for Notes using text")
+      val notesFound = Note.search("Interesting")
+
+      Then("Matching Notes are returned")
+      assert(notesFound.size == 2)
+      assert(
+        notesFound
+          .map(_.text)
+          .containsSlice(Seq("Interesting text", "Interesting note"))
+      )
     }
   }
