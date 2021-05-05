@@ -5,12 +5,13 @@
 	},
 	"extensions": [
 		"scalameta.metals",
-		"scala-lang.scala"
+		"ryanluker.vscode-coverage-gutters"
 	],
 	"settings": {
 		"metals.javaHome": "/usr/lib/jvm/java-15-openjdk",
-		"terminal.integrated.shell.linux": "/bin/bash"
+		"terminal.integrated.shell.linux": "/bin/bash",
+		"coverage-gutters.coverageBaseDir": "target/scala*/jacoco/report",
+		"coverage-gutters.coverageReportFileName": "${coverageBaseDir}/index.html"
 	},
-	"postCreateCommand": "sbt bloopInstall",
 	"remoteUser": "vscode"
 }
