@@ -23,5 +23,8 @@ lazy val root = project
     libraryDependencies += "org.typelevel" %% "cats-core" % "2.5.0",
     libraryDependencies += ("com.typesafe.slick" %% "slick" % "3.3.3")
       .cross(CrossVersion.for3Use2_13),
-    libraryDependencies += "org.slf4j" % "slf4j-nop" % "2.0.0-alpha1"
+    libraryDependencies += "org.slf4j" % "slf4j-nop" % "2.0.0-alpha1",
+    resolvers += Resolver.jcenterRepo,
+    libraryDependencies += ("com.liyaos" %% "scala-forklift-slick" % "0.3.2")
+      .cross(CrossVersion.for3Use2_13)
   )
