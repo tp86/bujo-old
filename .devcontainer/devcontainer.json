@@ -3,13 +3,17 @@
 	"build": {
 		"dockerfile": "Dockerfile",
 	},
+	"mounts": [
+		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+	],
+	"postCreateCommand": "echo \"vscode\" | sudo -S su -c 'chown root:docker /var/run/docker.sock && chmod g+w /var/run/docker.sock'",
 	"extensions": [
 		"scalameta.metals",
 		"ryanluker.vscode-coverage-gutters"
 	],
 	"settings": {
 		"metals.javaHome": "/usr/lib/jvm/java-15-openjdk",
-		"terminal.integrated.shell.linux": "/bin/bash",
+		"terminal.integrated.defaultProfile.linux": "/bin/bash",
 		"coverage-gutters.coverageBaseDir": "target/scala*/jacoco/report",
 		"coverage-gutters.coverageReportFileName": "${coverageBaseDir}/index.html"
 	},
