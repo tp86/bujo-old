@@ -5,7 +5,7 @@ lazy val repo = project
 lazy val migrationsDeps = Seq(
   "com.typesafe.slick" %% "slick" % "3.3.3",
   "com.liyaos" %% "scala-forklift-slick" % "0.3.2",
-  "com.typesafe.slick" %% "slick-hikaricp" % "0.3.2",
+  "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3",
   "org.slf4j" % "slf4j-nop" % "2.0.0-alpha1",
   "org.xerial" % "sqlite-jdbc" % "3.34.0",
 )
