@@ -1,6 +1,11 @@
+addCommandAlias("migrate", "migrations/run")
+
 lazy val repo = project
   .in(file("."))
   .aggregate(migrations, generatedCode)
+  .settings(
+    scalaVersion := "2.13.5",
+  )
 
 lazy val migrationsDeps = Seq(
   "com.typesafe.slick" %% "slick" % "3.3.3",
@@ -17,6 +22,7 @@ lazy val migrations = project
     scalaVersion := "2.13.5",
     resolvers += Resolver.jcenterRepo,
     libraryDependencies ++= migrationsDeps,
+    Compile / unmanagedResourceDirectories += baseDirectory.value / ".." / "src/main/resources/",
   )
 
 lazy val generatedCode = project

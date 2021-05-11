@@ -9,5 +9,6 @@ object Migrations
   override def tableNames: Seq[String] = Seq(
     "notes"
   )
+  MigrationSummary
   execCommands(args.toList)
 }
