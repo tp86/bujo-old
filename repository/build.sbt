@@ -23,6 +23,12 @@ lazy val migrations = project
     resolvers += Resolver.jcenterRepo,
     libraryDependencies ++= migrationsDeps,
     Compile / unmanagedResourceDirectories += baseDirectory.value / ".." / "src/main/resources/",
+    Compile / resourceGenerators += Def.task {
+      val file = baseDirectory.value / "src/main/resources" / "migrations.conf"
+      val contents = s"handled_location=${(baseDirectory.value / "src/main/scala").getCanonicalPath}"
+      IO.write(file, contents)
+      Seq(file)
+    }.taskValue,
   )
 
 lazy val generatedCode = project
