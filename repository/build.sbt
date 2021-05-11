@@ -23,12 +23,15 @@ lazy val migrations = project
     resolvers += Resolver.jcenterRepo,
     libraryDependencies ++= migrationsDeps,
     Compile / unmanagedResourceDirectories += baseDirectory.value / ".." / "src/main/resources/",
+    // https://www.scala-sbt.org/1.x/docs/Howto-Generating-Files.html
+    // NOTE: For the efficiency of the build, resourceGenerators should avoid regenerating resource files upon each call, and cache based on the input values using sbt.Tracked.{ inputChanged, outputChanged } etc instead.
     Compile / resourceGenerators += Def.task {
       val file = baseDirectory.value / "src/main/resources" / "migrations.conf"
       val contents = s"handled_location=${(baseDirectory.value / "src/main/scala").getCanonicalPath}"
       IO.write(file, contents)
       Seq(file)
     }.taskValue,
+    // https://www.scala-sbt.org/1.x/docs/Howto-Package.html#Modify+the+contents+of+the+package
   )
 
 lazy val generatedCode = project
