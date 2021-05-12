@@ -8,5 +8,7 @@ target/
 project/*
 !project/build.properties
 !project/plugins.sbt
-repository/migrations/**/migrations.conf
+repository/.bsp/
+repository/project/
+**/generated-resources/**
 test.db

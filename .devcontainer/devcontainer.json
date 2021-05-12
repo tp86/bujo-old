@@ -5,7 +5,8 @@
 	},
 	"extensions": [
 		"scalameta.metals",
-		"ryanluker.vscode-coverage-gutters"
+		"ryanluker.vscode-coverage-gutters",
+		"alexcvzz.vscode-sqlite"
 	],
 	"settings": {
 		"metals.javaHome": "/usr/lib/jvm/java-15-openjdk",
