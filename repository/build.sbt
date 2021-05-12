@@ -39,6 +39,7 @@ lazy val generateResourcesImpl: Def.Initialize[Task[Seq[File]]] = Def.task {
 }
 
 lazy val init = taskKey[Unit]("Initialize repository project.")
+lazy val createDirs = taskKey[Unit]("Create necessary directories.")
 lazy val repo = project
   .in(file("."))
   .aggregate(migrations, generatedCode)
@@ -52,7 +53,23 @@ lazy val repo = project
     Compile / unmanagedResourceDirectories += baseDirectory.value / "src/main/generated-resources",
     generateResources := generateResourcesImpl.value,
     Compile / resourceGenerators += generateResources.taskValue,
+    createDirs := {
+      import java.nio.file.{Files, Paths}
+      val s = streams.value
+      val dirs = Seq(
+        baseDirectory.value / "migrations/src/main/scala/migrations",
+        baseDirectory.value / "db",
+      )
+      dirs foreach { dir =>
+        val path = Paths.get(dir.getAbsolutePath)
+        if (!Files.exists(path)) {
+          s.log.info(s"Creating directory ${dir.getAbsolutePath}")
+          Files.createDirectory(path)
+        }
+      }
+    },
     init := {
+      (Compile / createDirs).value
       (Compile / generateResources).value
       (migrations / Compile / run).toTask(" init").value
     },

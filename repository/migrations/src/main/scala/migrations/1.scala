@@ -1,0 +1,1 @@
+/home/user/bujo/repository/src_migrations/main/scala/1.scala
