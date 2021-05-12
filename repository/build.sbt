@@ -38,7 +38,7 @@ lazy val generateResourcesImpl: Def.Initialize[Task[Seq[File]]] = Def.task {
   cachedGenerator(FileInfo.hash(fileToMonitor.value))
 }
 
-lazy val init = taskKey[Unit]("")
+lazy val init = taskKey[Unit]("Initialize repository project.")
 lazy val repo = project
   .in(file("."))
   .aggregate(migrations, generatedCode)
