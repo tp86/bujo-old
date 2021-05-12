@@ -10,5 +10,6 @@ project/*
 !project/plugins.sbt
 repository/.bsp/
 repository/project/
+repository/generated_code
 **/generated-resources/**
 test.db
