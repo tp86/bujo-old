@@ -110,4 +110,5 @@ lazy val generatedCode = project
   .in(file("generated_code"))
   .settings(
     scalaVersion := "2.13.5",
+    libraryDependencies += "com.typesafe.slick" %% "slick" % "3.3.3",
   )
