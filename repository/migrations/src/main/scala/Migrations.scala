@@ -1,5 +1,6 @@
 import com.liyaos.forklift.slick._
-import com.typesafe.config.{Config, ConfigFactory}
+
+import config.RepoSettings
 
 object Migrations
     extends App
@@ -8,11 +9,12 @@ object Migrations
     with SlickMigrationManager
     with SlickCodegen {
   override def tableNames: Seq[String] = Seq(
-    "NOTES"
+    "NOTES",
   )
-  val conf = ConfigFactory.load("repo")
-  override val generatedDir: String = conf.getString("repo.generated_code.location")
-  override def pkgName(version: String): String = "bujo." + super.pkgName(version)
+  val conf = RepoSettings()
+  override val generatedDir: String = conf.location
+  override def pkgName(version: String): String =
+    Seq(conf.pkgPrefix, super.pkgName(version)).mkString(".")
   MigrationSummary
   execCommands(args.toList)
 }

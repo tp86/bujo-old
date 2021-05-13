@@ -52,6 +52,7 @@ lazy val createDirsImpl: Def.Initialize[Task[Unit]] = Def.task {
 lazy val init = taskKey[Unit]("Initialize repository project.")
 lazy val repo = project
   .in(file("."))
+  .dependsOn(generatedCode)
   .aggregate(migrations, generatedCode)
   .settings(
     scalaVersion := "2.13.5",
@@ -64,8 +65,6 @@ lazy val repo = project
     filesToGenerate := Map(
       baseDirectory.value / "src/main/generated-resources" / "db.conf" ->
         s"""slick.db.url = "jdbc:sqlite:${(baseDirectory.value / "db/test.db").getCanonicalPath}"""",
-      baseDirectory.value / "src/main/generated-resources" / "repo.conf" ->
-        s"""repo.generated_code.location = ${(baseDirectory.value / "generated_code/src/main/scala").getCanonicalPath}""",
     ),
     Compile / unmanagedResourceDirectories += baseDirectory.value / "src/main/generated-resources",
     generateResources := generateResourcesImpl.value,
@@ -110,6 +109,11 @@ lazy val migrations = project
       baseDirectory.value / "src/main/scala/migrations" / "Summary.scala" ->
         s"""|object MigrationSummary {
             |
+            |}""".stripMargin,
+      baseDirectory.value / "src/main/generated-resources" / "repo.conf" ->
+        s"""|repo.generated_code {
+            |    location = ${(baseDirectory.value / ".." / "generated_code/src/main/scala").getCanonicalPath}
+            |    package_prefix = bujo
             |}""".stripMargin,
     ),
     Compile / unmanagedResourceDirectories ++= Seq(
