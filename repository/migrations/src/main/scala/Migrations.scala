@@ -1,4 +1,5 @@
 import com.liyaos.forklift.slick._
+import com.typesafe.config.{Config, ConfigFactory}
 
 object Migrations
     extends App
@@ -9,7 +10,8 @@ object Migrations
   override def tableNames: Seq[String] = Seq(
     "NOTES"
   )
-  override val generatedDir: String = "repository/generated_code/src/main/scala"
+  val conf = ConfigFactory.load("repo")
+  override val generatedDir: String = conf.getString("repo.generated_code.location")
   override def pkgName(version: String): String = "bujo." + super.pkgName(version)
   MigrationSummary
   execCommands(args.toList)

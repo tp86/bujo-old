@@ -64,6 +64,8 @@ lazy val repo = project
     filesToGenerate := Map(
       baseDirectory.value / "src/main/generated-resources" / "db.conf" ->
         s"""slick.db.url = "jdbc:sqlite:${(baseDirectory.value / "db/test.db").getCanonicalPath}"""",
+      baseDirectory.value / "src/main/generated-resources" / "repo.conf" ->
+        s"""repo.generated_code.location = ${(baseDirectory.value / "generated_code/src/main/scala").getCanonicalPath}""",
     ),
     Compile / unmanagedResourceDirectories += baseDirectory.value / "src/main/generated-resources",
     generateResources := generateResourcesImpl.value,
@@ -83,6 +85,7 @@ lazy val migrationsDeps = Seq(
   "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3",
   "org.slf4j" % "slf4j-nop" % "2.0.0-alpha1",
   "org.xerial" % "sqlite-jdbc" % "3.34.0",
+  "com.typesafe" % "config" % "1.4.1",
 )
 lazy val migrations = project
   .in(file("migrations"))
