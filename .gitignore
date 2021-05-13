@@ -11,5 +11,6 @@ project/*
 repository/.bsp/
 repository/project/
 repository/generated_code
+repository/migrations/src/main/scala/migrations
 **/generated-resources/**
 test.db
